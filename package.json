@@ -1,0 +1,29 @@
+{
+  "type": "module",
+  "name": "youtube",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "mocha --reporter mocha-allure-reporter"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/andreishevelev/youtube.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/andreishevelev/youtube/issues"
+  },
+  "homepage": "https://github.com/andreishevelev/youtube#readme",
+  "dependencies": {
+    "chai": "^4.3.7",
+    "chromedriver": "^108.0.0",
+    "mocha": "^10.1.0",
+    "mocha-allure-reporter": "^1.4.0",
+    "request": "^2.88.2",
+    "selenium-webdriver": "^4.7.0"
+  }
+}
