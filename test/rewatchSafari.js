@@ -6,9 +6,9 @@ import { Options } from "selenium-webdriver/chrome.js";
 
 let mongodb = new Mongodb();
 
-var options = new Options();
-options.options_["debuggerAddress"] = "127.0.0.1:9222";
-const driver = new Builder().forBrowser('chrome').setChromeOptions(options).build();
+// var options = new Options();
+// options.options_["debuggerAddress"] = "127.0.0.1:9223";
+const driver = new Builder().forBrowser('safari').build();
 
 // await driver.manage().window().maximize();
 
@@ -31,6 +31,7 @@ function getRandomIntInclusive(min, max) {
 
 describe(`Can watch video again and again and ...`, function () {
   this.timeout(0);
+  this.retries(100);
 
   before(async () => {
   });
@@ -83,6 +84,7 @@ describe(`Can watch video again and again and ...`, function () {
       let tile = tiles[randomTileNum];
 
       while (clickedTiles.includes(randomTileNum)) {
+        clickedTiles.length === tiles.length ? clickedTiles = []:
         randomTileNum = (getRandomIntInclusive(1, tiles.length));
         tile = tiles[randomTileNum];
       }
