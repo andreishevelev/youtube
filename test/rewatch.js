@@ -10,7 +10,7 @@ var options = new Options();
 options.options_["debuggerAddress"] = "127.0.0.1:9222";
 const driver = new Builder().forBrowser('chrome').setChromeOptions(options).build();
 
-await driver.manage().window().maximize();
+// await driver.manage().window().maximize();
 
 let defTimeout = 5000;
 
@@ -48,34 +48,54 @@ describe(`Can watch video again and again and ...`, function () {
   it(`can re-watch the video`, async () => {
     let inf = 1;
 
-    while (inf === 1) {
+    async function rewatch() {
 
-      let timelineLocator = `//div[@class='ytp-timed-markers-container']`
-      let timelineEl = await driver.wait(until.elementLocated(By.xpath(timelineLocator)), defTimeout);
-      const actions = driver.actions({ async: true });
-      await actions.move({ origin: timelineEl }).perform();
-      await actions.move({ x: 8, y: 0, origin: Origin.POINTER }).perform();
-      await actions.move({ x: -8, y: 0, origin: Origin.POINTER }).perform();
+      await driver.get(youtubeUrl);
+      let libraryLinkEl = await waitLV(By.xpath(`//a[@title="Library"]`), defTimeout)
+      let libraryLinkText = libraryLinkEl.getText();
 
-      let durationLocator = `//span[@class='ytp-time-duration']`
-      let durationEl = await driver.wait(until.elementLocated(By.xpath(durationLocator)), defTimeout);
-      let duration = await durationEl.getText();
+      let searchInput = await waitLV(By.xpath(`//input[@id="search"]`), defTimeout);
+      await searchInput.sendKeys('канал веселовка в юном месяце апреле');
 
-      let currentLocator = `//span[@class='ytp-time-current']`
-      let currentEl = await driver.wait(until.elementLocated(By.xpath(currentLocator)), defTimeout);
-      let current = await currentEl.getText();
+      let searchButton = await waitLV(By.xpath(`//button[@id="search-icon-legacy"]`), defTimeout);
+      await searchButton.click();
 
-      console.log(`current`, current);
-      console.log(`duration`, duration);
 
-      if (current === duration) {
-        console.log(`inside if`);
-        let replay = await waitLV(By.css(`[title="Replay"]`), 10000);
-        await replay.click();
-        console.log(`replay clicked`);
-        await driver.sleep(10000);
+      let firstVideo = await waitLV(By.xpath(`//yt-formatted-string[.="В юном месяце апреле  Семейный канал Веселовка  Кристина поет Крылатые качели"]`), defTimeout);
+      await firstVideo.click();
+
+      while (inf === 1) {
+
+        let timelineLocator = `//div[@class='ytp-timed-markers-container']`
+        let timelineEl = await waitLV(By.xpath(timelineLocator), defTimeout);
+        // let timelineEl = await driver.wait(until.elementLocated(By.xpath(timelineLocator)), defTimeout);
+        // await driver.sleep(1000);
+        const actions = driver.actions({ async: true });
+        await actions.move({ origin: timelineEl }).perform();
+        await actions.move({ x: 8, y: 0, origin: Origin.POINTER }).perform();
+        await actions.move({ x: -8, y: 0, origin: Origin.POINTER }).perform();
+
+        let durationLocator = `//span[@class='ytp-time-duration']`
+        let durationEl = await driver.wait(until.elementLocated(By.xpath(durationLocator)), defTimeout);
+        let duration = await durationEl.getText();
+
+        let currentLocator = `//span[@class='ytp-time-current']`
+        let currentEl = await driver.wait(until.elementLocated(By.xpath(currentLocator)), defTimeout);
+        let current = await currentEl.getText();
+
+        console.log(`current`, current);
+        console.log(`duration`, duration);
+
+        if (current === duration) {
+          console.log(`inside if`);
+          await rewatch();
+
+        }
+        await driver.sleep(500);
       }
-      await driver.sleep(500);
     }
+
+    await rewatch();
+
   });
 });
