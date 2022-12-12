@@ -71,7 +71,8 @@ describe(`Can watch video again and again and ...`, function () {
       await driver.sleep(1000);
       await searchButton.click();
 
-      let channel = await driver.wait(until.elementLocated(By.xpath(`//*[.='veselovka']`)), defTimeout);
+      let channel = await driver.wait(until.elementLocated(By.xpath(`//*[.='veselovka']/preceding::ytd-channel-name[@id='channel-title'][1]`)), defTimeout);
+      await actions.move({ origin: channel }).perform();
       await driver.sleep(1000);
       await channel.click();
 
