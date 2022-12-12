@@ -59,7 +59,7 @@ describe(`Can watch video again and again and ...`, function () {
     async function rewatch() {
 
       await driver.get(youtubeUrl);
-      const actions = driver.actions({ async: true });
+      let actions = driver.actions({ async: true });
 
       let searchInput = await waitLV(By.xpath(`//input[@id="search"]`), defTimeout);
       await actions.move({ origin: searchInput }).perform();
@@ -76,11 +76,22 @@ describe(`Can watch video again and again and ...`, function () {
       await driver.sleep(1000);
       await channel.click();
 
-      // let videos = await driver.wait(until.elementLocated(By.xpath(`(//tp-yt-paper-tab)[2]//div`)), defTimeout);
-      let videos = await waitLV(By.xpath(`(//tp-yt-paper-tab)[2]//paper-ripple`), defTimeout);
-      await driver.sleep(1000);
-      await actions.move({ origin: videos }).perform();
-      await videos.click();
+      // // let videos = await driver.wait(until.elementLocated(By.xpath(`(//tp-yt-paper-tab)[2]//div`)), defTimeout);
+      // let videos = await waitLV(By.xpath(`(//tp-yt-paper-tab)[2]//paper-ripple`), defTimeout);
+      // await driver.sleep(1000);
+      // await actions.move({ origin: videos }).perform();
+      // await videos.click();
+
+      await driver.sleep(3000);
+
+      actions = driver.actions({ async: true });
+      await actions
+      .keyDown(Key.TAB)
+      .keyDown(Key.TAB)
+      .keyDown(Key.TAB)
+      .keyDown(Key.RIGHT)
+      .keyDown(Key.ENTER)
+      .perform();
 
       let tileContainerXpath = `(//ytd-two-column-browse-results-renderer[@page-subtype="channels"]//div[@id="content"])[${getRandomIntInclusive(1, 17)}]`
       let tileContainer = await waitLV(By.xpath(tileContainerXpath), defTimeout);
