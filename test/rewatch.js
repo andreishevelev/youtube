@@ -84,6 +84,7 @@ describe(`Can watch video again and again and ...`, function () {
       let tile = tiles[randomTileNum];
 
       while (clickedTiles.includes(randomTileNum)) {
+        clickedTiles.length === tiles.length ? clickedTiles = []:
         randomTileNum = (getRandomIntInclusive(1, tiles.length));
         tile = tiles[randomTileNum];
       }
