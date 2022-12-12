@@ -51,8 +51,8 @@ describe(`Can watch video again and again and ...`, function () {
     async function rewatch() {
 
       await driver.get(youtubeUrl);
-      let libraryLinkEl = await waitLV(By.xpath(`//a[@title="Library"]`), defTimeout)
-      let libraryLinkText = libraryLinkEl.getText();
+      // let libraryLinkEl = await waitLV(By.xpath(`//a[@title="Library"]`), defTimeout)
+      // let libraryLinkText = libraryLinkEl.getText();
 
       let searchInput = await waitLV(By.xpath(`//input[@id="search"]`), defTimeout);
       await searchInput.sendKeys('канал веселовка в юном месяце апреле');
