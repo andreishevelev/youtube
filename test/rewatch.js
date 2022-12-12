@@ -78,8 +78,8 @@ describe(`Can watch video again and again and ...`, function () {
 
       // let videos = await driver.wait(until.elementLocated(By.xpath(`(//tp-yt-paper-tab)[2]//div`)), defTimeout);
       let videos = await waitLV(By.xpath(`(//tp-yt-paper-tab)[2]`), defTimeout);
-      await actions.move({ origin: videos }).perform();
       await driver.sleep(1000);
+      await actions.move({ origin: videos }).perform();
       await videos.click();
 
       let tileContainerXpath = `(//ytd-two-column-browse-results-renderer[@page-subtype="channels"]//div[@id="content"])[${getRandomIntInclusive(1, 17)}]`
