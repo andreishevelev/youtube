@@ -75,7 +75,7 @@ describe(`Can watch video again and again and ...`, function () {
       let searchInput = await waitLV(By.xpath(`//input[@id="search"]`), defTimeout);
       await actions.move({ origin: searchInput }).perform();
       await driver.sleep(1000);
-      await searchInput.sendKeys('канал веселовка в юном месяце апреле');
+      await searchInput.sendKeys('veselovka channel Как покрасить комод ikea своими руками используя малярный скотч');
 
       let searchButton = await waitLV(By.xpath(`//button[@id="search-icon-legacy"]`), defTimeout);
       await actions.move({ origin: searchButton }).perform();
