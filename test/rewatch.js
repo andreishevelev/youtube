@@ -23,6 +23,11 @@ let waitLV = async (locator, timeout) => {
   let element = driver.wait(until.elementIsVisible(await driver.findElement(locator)), timeout);
   return element;
 }
+function getRandomIntInclusive(min, max) {
+  min = Math.ceil(min);
+  max = Math.floor(max);
+  return Math.floor(Math.random() * (max - min + 1) + min); // The maximum is inclusive and the minimum is inclusive
+}
 
 
 
@@ -51,23 +56,7 @@ describe(`Can watch video again and again and ...`, function () {
     let inf = 1;
 
  
-
     async function rewatch() {
-
-      function getRandomIntInclusive() {
-        let min = 300;
-        let max = 900;
-        min = Math.ceil(min);
-        max = Math.floor(max);
-        return Math.floor(Math.random() * (max - min + 1) + min); // The maximum is inclusive and the minimum is inclusive
-      }
-      
-      async function type(text) {
-        for (var i = 0; i < text.length; i++) {
-          await driver.sendKeys(text[i]);
-          delay(getRandomIntInclusive());
-        }
-      }
 
       await driver.get(youtubeUrl);
       const actions = driver.actions({ async: true });
@@ -75,18 +64,23 @@ describe(`Can watch video again and again and ...`, function () {
       let searchInput = await waitLV(By.xpath(`//input[@id="search"]`), defTimeout);
       await actions.move({ origin: searchInput }).perform();
       await driver.sleep(1000);
-      await searchInput.sendKeys('veselovka channel Как покрасить комод ikea своими руками используя малярный скотч');
+      await searchInput.sendKeys('veselovka channel');
 
       let searchButton = await waitLV(By.xpath(`//button[@id="search-icon-legacy"]`), defTimeout);
       await actions.move({ origin: searchButton }).perform();
       await driver.sleep(1000);
       await searchButton.click();
 
-
-      let firstVideo = await waitLV(By.xpath(`//yt-formatted-string[.="Как покрасить комод ikea своими руками используя малярный скотч"]`), defTimeout);
-      await actions.move({ origin: firstVideo }).perform();
+      let channel = await waitLV(By.xpath(`//*[.='veselovka']`), defTimeout);
+      await actions.move({ origin: channel }).perform();
       await driver.sleep(1000);
-      await firstVideo.click();
+      await channel.click();
+
+      let tileContainerXpath = `(//ytd-two-column-browse-results-renderer[@page-subtype="channels"]//div[@id="content"])[${getRandomIntInclusive(1, 17)}]`
+      let tileContainer = await waitLV(By.xpath(tileContainerXpath), defTimeout);
+      await actions.move({ origin: tileContainer }).perform();
+      await driver.sleep(1000);
+      await tileContainer.click();
 
       while (inf === 1) {
 
