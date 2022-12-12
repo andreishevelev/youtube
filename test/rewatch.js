@@ -24,6 +24,8 @@ let waitLV = async (locator, timeout) => {
   return element;
 }
 
+
+
 describe(`Can watch video again and again and ...`, function () {
   this.timeout(0);
 
@@ -48,20 +50,42 @@ describe(`Can watch video again and again and ...`, function () {
   it(`can re-watch the video`, async () => {
     let inf = 1;
 
+ 
+
     async function rewatch() {
 
+      function getRandomIntInclusive() {
+        let min = 300;
+        let max = 900;
+        min = Math.ceil(min);
+        max = Math.floor(max);
+        return Math.floor(Math.random() * (max - min + 1) + min); // The maximum is inclusive and the minimum is inclusive
+      }
+      
+      async function type(text) {
+        for (var i = 0; i < text.length; i++) {
+          await driver.sendKeys(text[i]);
+          delay(getRandomIntInclusive());
+        }
+      }
+
       await driver.get(youtubeUrl);
-      // let libraryLinkEl = await waitLV(By.xpath(`//a[@title="Library"]`), defTimeout)
-      // let libraryLinkText = libraryLinkEl.getText();
+      const actions = driver.actions({ async: true });
 
       let searchInput = await waitLV(By.xpath(`//input[@id="search"]`), defTimeout);
+      await actions.move({ origin: searchInput }).perform();
+      await driver.sleep(1000);
       await searchInput.sendKeys('канал веселовка в юном месяце апреле');
 
       let searchButton = await waitLV(By.xpath(`//button[@id="search-icon-legacy"]`), defTimeout);
+      await actions.move({ origin: searchButton }).perform();
+      await driver.sleep(1000);
       await searchButton.click();
 
 
-      let firstVideo = await waitLV(By.xpath(`//yt-formatted-string[.="В юном месяце апреле  Семейный канал Веселовка  Кристина поет Крылатые качели"]`), defTimeout);
+      let firstVideo = await waitLV(By.xpath(`//yt-formatted-string[.="Как покрасить комод ikea своими руками используя малярный скотч"]`), defTimeout);
+      await actions.move({ origin: firstVideo }).perform();
+      await driver.sleep(1000);
       await firstVideo.click();
 
       while (inf === 1) {
