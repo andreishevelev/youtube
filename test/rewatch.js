@@ -31,6 +31,7 @@ function getRandomIntInclusive(min, max) {
 
 describe(`Can watch video again and again and ...`, function () {
   this.timeout(0);
+  this.retries(100);
 
   before(async () => {
   });
