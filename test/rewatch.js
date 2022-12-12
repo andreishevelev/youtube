@@ -77,7 +77,7 @@ describe(`Can watch video again and again and ...`, function () {
       await channel.click();
 
       // let videos = await driver.wait(until.elementLocated(By.xpath(`(//tp-yt-paper-tab)[2]//div`)), defTimeout);
-      let videos = await waitLV(By.xpath(`(//tp-yt-paper-tab)[2]//div`), defTimeout);
+      let videos = await waitLV(By.xpath(`(//tp-yt-paper-tab)[2]`), defTimeout);
       await actions.move({ origin: videos }).perform();
       await driver.sleep(1000);
       await videos.click();
