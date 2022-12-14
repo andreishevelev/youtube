@@ -45,10 +45,8 @@ async function rewatch() {
   let titleNum = getRandomIntInclusive(0, videoTitles.length - 1);
   let videoTitle = videoTitles[titleNum];
 
-  if (watchedTitles.includes(videoTitle)) { await rewatch() }
   if (watchedTitles.length === videoTitles.length) { watchedTitles = [] } // TODO Log out, break
-
-  console.log(`watchedTitles`, watchedTitles);
+  if (watchedTitles.includes(videoTitle)) { await rewatch() }
 
   // open youtube.com
   console.log(`open youtube.com`);
@@ -82,7 +80,7 @@ async function rewatch() {
   // if add shown click skip button
   for (let i = 0; i < 2; i++) {
     console.log(`inside for loop skip add`);
-    let adsXpath = `//img[@class='ytp-ad-image']`
+    let adsXpath = `//img[@class='ytp-ad-image' or @class='ytp-ads-image']`
     try {
       await driver.wait(until.elementLocated(By.xpath(adsXpath)), 2000);
       await driver.wait(until.elementIsVisible(await driver.findElement(By.xpath(adsXpath))), 1000);
@@ -112,37 +110,11 @@ async function rewatch() {
     }
   }
 
-  // get actual title
-  console.log(`get actual title`);
-  let actualTitleXpath = `//div[@id='info']//h1`
-  await driver.wait(until.elementLocated(By.xpath(actualTitleXpath)), defTimeout);
-  let actualTitleEl = await driver.findElement(By.xpath(actualTitleXpath), defTimeout);
-  let actualTitle = await actualTitleEl.getText();
-
-  // remove extra spaces from the actual title
-  function replaceSpaces(string) {
-    while (string.includes('  ')) {
-      string = string.replace(/\s\s/, ' ');
-    }
-    return string;
-  }
-  actualTitle = replaceSpaces(actualTitle);
-
-  while (actualTitle.includes('й')) {
-    actualTitle = actualTitle.replace(/й/, 'й');
-  }
-
-  // if video title does not match, re-run rewatch function
-  if (!(videoTitle === actualTitle)) {
-    console.log(`video titles does not match, re-run rewatch function`);
-    rewatch();
-  }
-
   // add current video to the array with watched videos
   if (!watchedTitles.includes(videoTitle)) { watchedTitles.push(videoTitle) }
+  console.log(`watchedTitles`, watchedTitles);
 
   // try to set playback speed to x2 speed
-
   try {
     // mouse over the video
     console.log(`mouse over the video`);
@@ -177,7 +149,7 @@ async function rewatch() {
 
   while (1 === 1) {
     // if video ends, then watch another one
-    let adsXpath = `//img[@class='ytp-ad-image']`
+    let adsXpath = `//img[@class='ytp-ad-image' or @class='ytp-ads-image']`
     try {
       await driver.wait(until.elementLocated(By.xpath(adsXpath)), 100);
       await driver.wait(until.elementIsVisible(await driver.findElement(By.xpath(adsXpath))), 100);
@@ -197,31 +169,7 @@ async function rewatch() {
     }
     let replayButtons = await driver.findElements(By.xpath(replayButtonsXpath));
 
-    // get actual title
-    let actualTitleXpath = `//div[@id='info']//h1`
-    try {
-      await driver.wait(until.elementLocated(By.xpath(actualTitleXpath)), 100);
-      let actualTitleEl = await driver.findElement(By.xpath(actualTitleXpath));
-      let actualTitle = await actualTitleEl.getText();
-      // remove extra spaces from the actual title
-      actualTitle = replaceSpaces(actualTitle);
-    }
-    catch (err) {
-      console.log(`getting actual title inside while loop error`, err);
-    }
-
-    while (actualTitle.includes('й')) {
-      actualTitle = actualTitle.replace(/й/, 'й');
-    }
-
-    console.log(`t `, videoTitle);
-    console.log(`a `, actualTitle);
-
-    console.log(`(replayButtons.length === 1) `, (replayButtons.length == 1));
-    console.log(`(adsImg.length > 0) `, (adsImg.length > 0));
-    console.log(`!(videoTitle === actualTitle) `, !(videoTitle === actualTitle));
-
-    if ((replayButtons.length === 1) || (adsImg.length > 0) || !(videoTitle === actualTitle)) {
+    if ((replayButtons.length > 0) || (adsImg.length > 0)) {
       console.log(`inside rewatch if, calling rewatch function`);
       await rewatch();
     }
