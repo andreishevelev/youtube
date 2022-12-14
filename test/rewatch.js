@@ -113,32 +113,32 @@ async function rewatch() {
     }
   }
 
-  // mouse over the video
-  console.log(`mouse over the video`);
-  let video = await waitLV(By.xpath(`//video`), defTimeout);
-  actions = driver.actions({ async: true });
-  await actions.move({ origin: video }).perform();
+  // // mouse over the video
+  // console.log(`mouse over the video`);
+  // let video = await waitLV(By.xpath(`//video`), defTimeout);
+  // actions = driver.actions({ async: true });
+  // await actions.move({ origin: video }).perform();
 
-  // set playback speed to 2x
-  // click settings button
-  console.log(`set playback speed to 2x`);
-  console.log(`click settings button`);
-  let settingsButton = await waitLV(By.xpath(`//button[@title='Settings']`), defTimeout);
-  await settingsButton.click();
-  await driver.sleep(700);
+  // // set playback speed to 2x
+  // // click settings button
+  // console.log(`set playback speed to 2x`);
+  // console.log(`click settings button`);
+  // let settingsButton = await waitLV(By.xpath(`//button[@title='Settings']`), defTimeout);
+  // await settingsButton.click();
+  // await driver.sleep(700);
   
-  // select playback speed option
-  console.log(`select playback speed option`);
-  let plSpeedButton = await waitLV(By.xpath(`//div[.='Playback speed']`), defTimeout);
-  await plSpeedButton.click();
-  await driver.sleep(800);
+  // // select playback speed option
+  // console.log(`select playback speed option`);
+  // let plSpeedButton = await waitLV(By.xpath(`//div[.='Playback speed']`), defTimeout);
+  // await plSpeedButton.click();
+  // await driver.sleep(800);
   
-  // select 2x speed
-  console.log(`select 2x speed`);
-  let speed2x = await waitLV(By.xpath(`//div[@class='ytp-menuitem-label' and .='2']`), defTimeout);
-  await speed2x.click();
-  await settingsButton.click();
-  await driver.sleep(1200);
+  // // select 2x speed
+  // console.log(`select 2x speed`);
+  // let speed2x = await waitLV(By.xpath(`//div[@class='ytp-menuitem-label' and .='2']`), defTimeout);
+  // await speed2x.click();
+  // await settingsButton.click();
+  // await driver.sleep(1200);
 
   while (1 === 1) {
     // if video ends, then watch another one
