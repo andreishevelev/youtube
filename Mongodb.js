@@ -1,51 +1,133 @@
-let mongodb = function () {
+import {expect} from 'chai';
+import Request from 'request'
+import supertest from 'supertest';
 
-  let insertMongo = async function (email, dob) {
+const token = `MmnLh854oUnSY1q3Ky1lsePwA6a3h3kuxzrSWbPXJGOCXQAIsH8M2MfwYrsAinTZ`
+const baseUrl = `https://data.mongodb-api.com/app/data-dxwug/endpoint/data/v1/action`
+const headers = `content-type": "application/json", "api-key": "MmnLh854oUnSY1q3Ky1lsePwA6a3h3kuxzrSWbPXJGOCXQAIsH8M2MfwYrsAinTZ`
 
-    const uri = "mongodb+srv://admin:admin@cluster0.euhw8sz.mongodb.net/?retryWrites=true&w=majority";
-    var Request = require("request");
+export function insertOne(database, collection, data) {
+  data = JSON.stringify(data);
+  data = JSON.parse(data);
 
-    let doc = {
-      "email": email,
-      "dob": dob,
-    };
+  try {
+    Request.post({
+      "headers": { headers },
+      "url": `${baseUrl}/insertOne`,
+      "body": JSON.stringify({
+        "dataSource": "Cluster0",
+        "database": database,
+        "collection": collection,
+        "document": data
+      })
+    }, (error, response, body) => {
+      if (!error) {
+        var resp = JSON.parse(response['body']);
+        console.log(resp);
+      } else {
+        console.log(error);
+        insertOne();
+      }
+    });
+  } catch (error) {
+    console.log(`ReporterFs.sendData: `, error);
+  }
+}
 
-    doc = JSON.stringify(doc);
-    doc = JSON.parse(doc);
+export async function insertArray(database, collection, data) {
 
-    try {
-      Request.post({
-        "headers": { "content-type": "application/json", "api-key": "MmnLh854oUnSY1q3Ky1lsePwA6a3h3kuxzrSWbPXJGOCXQAIsH8M2MfwYrsAinTZ" },
-        "url": "https://data.mongodb-api.com/app/data-dxwug/endpoint/data/v1/action/insertOne",
-        "body": JSON.stringify({
-          "dataSource": "Cluster0",
-          "database": "google",
-          "collection": "accounts",
-          "document": doc
-        })
-      }, (error, response, body) => {
-        if (!error) {
-          var resp = JSON.parse(response['body']);
-          console.log(resp);
-        } else {
-          console.log(error);
-          insertMongo();
+  data = JSON.stringify(data);
+  data = JSON.parse(data);
+
+  try {
+    Request.post({
+      "headers": { "content-type": "application/json", "api-key": "MmnLh854oUnSY1q3Ky1lsePwA6a3h3kuxzrSWbPXJGOCXQAIsH8M2MfwYrsAinTZ" },
+      "url": "https://data.mongodb-api.com/app/data-dxwug/endpoint/data/v1/action/updateOne",
+      "body": JSON.stringify({
+        "dataSource": "Cluster0",
+        "database": database,
+        "collection": collection,
+        "filter": { "channelName": "veselovka" },
+        "update": {
+          "$push": {
+            "videos":
+            {
+              "$each": [
+                data
+              ]
+            }
+          }
         }
-      });
-    } catch (error) {
-      console.log(`ReporterFs.sendData: `, error);
-    }
+      })
+    }, (error, response, body) => {
+      if (!error) {
+        var resp = JSON.parse(response['body']);
+        console.log(resp);
+      } else {
+        console.log(error);
+        insertArray();
+      }
+    });
+
+  } catch (error) {
+    console.log(`ReporterFs.sendData: `, error);
+  }
+}
+
+export async function findOne(database, collection) {
+
+
+
+  // data = JSON.stringify(data);
+  // data = JSON.parse(data);
+
+  try {
+    Request.post({
+      "headers": { "content-type": "application/json", "api-key": "MmnLh854oUnSY1q3Ky1lsePwA6a3h3kuxzrSWbPXJGOCXQAIsH8M2MfwYrsAinTZ" },
+      "url": "https://data.mongodb-api.com/app/data-dxwug/endpoint/data/v1/action/findOne",
+      "body": JSON.stringify({
+        "dataSource": "Cluster0",
+        "database": database,
+        "collection": collection,
+        "filter": { "channelName": "veselovka" }
+      })
+    }, (error, response, body) => {
+      if (!error) {
+        var resp = JSON.parse(response['body']);
+        console.log(`RESP**********`, resp);
+        return resp;
+      } else {
+        console.log(error);
+        findOne();
+      }
+    });
+
+  } catch (error) {
+    console.log(`ReporterFs.sendData: `, error);
+  }
+}
+
+export async function findOneST(database, collection) {
+
+  const payload = {
+    "dataSource": "Cluster0",
+    "database": database,
+    "collection": collection,
+    "filter": { "channelName": "veselovka" }
   }
 
-  // async function run() {
-  //   let i = 0;
-  //   while (i < 1000) {
-  //     await insertMongo();
-  //     i++
-  //   }
-  // }
+  const request = supertest('https://data.mongodb-api.com/app/data-dxwug/endpoint/data/v1/action/');
 
-  // insertMongo()
+  try {
+    const res = await request
+      .post(`findOne`)
+      .set('content-type', 'application/json')
+      .set('api-key', token)
+      .send(payload);
+    // expect(res.status).to.be.eq(200);
+    return res.body;
 
+  } catch (error) {
+    console.log(`ReporterFs.sendData: `, error);
+  }
 }
-export default mongodb;
