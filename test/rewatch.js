@@ -46,7 +46,6 @@ async function rewatch() {
   let videoTitle = videoTitles[titleNum];
 
   if (watchedTitles.includes(videoTitle)) { await rewatch() }
-  if (!watchedTitles.includes(videoTitle)) { watchedTitles.push(videoTitle) }
   if (watchedTitles.length === videoTitles.length) { watchedTitles = [] } // TODO Log out, break
 
   console.log(`watchedTitles`, watchedTitles);
@@ -113,43 +112,78 @@ async function rewatch() {
     }
   }
 
-  // // mouse over the video
-  // console.log(`mouse over the video`);
-  // let video = await waitLV(By.xpath(`//video`), defTimeout);
-  // actions = driver.actions({ async: true });
-  // await actions.move({ origin: video }).perform();
+  // get actual title
+  console.log(`get actual title`);
+  let actualTitleXpath = `//div[@id='info']//h1`
+  await driver.wait(until.elementLocated(By.xpath(actualTitleXpath)), defTimeout);
+  let actualTitleEl = await driver.findElement(By.xpath(actualTitleXpath), defTimeout);
+  let actualTitle = await actualTitleEl.getText();
 
-  // // set playback speed to 2x
-  // // click settings button
-  // console.log(`set playback speed to 2x`);
-  // console.log(`click settings button`);
-  // let settingsButton = await waitLV(By.xpath(`//button[@title='Settings']`), defTimeout);
-  // await settingsButton.click();
-  // await driver.sleep(700);
-  
-  // // select playback speed option
-  // console.log(`select playback speed option`);
-  // let plSpeedButton = await waitLV(By.xpath(`//div[.='Playback speed']`), defTimeout);
-  // await plSpeedButton.click();
-  // await driver.sleep(800);
-  
-  // // select 2x speed
-  // console.log(`select 2x speed`);
-  // let speed2x = await waitLV(By.xpath(`//div[@class='ytp-menuitem-label' and .='2']`), defTimeout);
-  // await speed2x.click();
-  // await settingsButton.click();
-  // await driver.sleep(1200);
+  // remove extra spaces from the actual title
+  function replaceSpaces(string) {
+    while (string.includes('  ')) {
+      string = string.replace(/\s\s/, ' ');
+    }
+    return string;
+  }
+  actualTitle = replaceSpaces(actualTitle);
+
+  while (actualTitle.includes('й')) {
+    actualTitle = actualTitle.replace(/й/, 'й');
+  }
+
+  // if video title does not match, re-run rewatch function
+  if (!(videoTitle === actualTitle)) {
+    console.log(`video titles does not match, re-run rewatch function`);
+    rewatch();
+  }
+
+  // add current video to the array with watched videos
+  if (!watchedTitles.includes(videoTitle)) { watchedTitles.push(videoTitle) }
+
+  // try to set playback speed to x2 speed
+
+  try {
+    // mouse over the video
+    console.log(`mouse over the video`);
+    let video = await waitLV(By.xpath(`//video`), defTimeout);
+    actions = driver.actions({ async: true });
+    await actions.move({ origin: video }).perform();
+
+    // set playback speed to 2x
+    // click settings button
+    console.log(`set playback speed to 2x`);
+    console.log(`click settings button`);
+    let settingsButton = await waitLV(By.xpath(`//button[@title='Settings']`), 2000);
+    await settingsButton.click();
+    await driver.sleep(700);
+
+    // select playback speed option
+    console.log(`select playback speed option`);
+    let plSpeedButton = await waitLV(By.xpath(`//div[.='Playback speed']`), 2000);
+    await plSpeedButton.click();
+    await driver.sleep(800);
+
+    // select 2x speed
+    console.log(`select 2x speed`);
+    let speed2x = await waitLV(By.xpath(`//div[@class='ytp-menuitem-label' and .='2']`), 2000);
+    await speed2x.click();
+    await settingsButton.click();
+    await driver.sleep(1200);
+  }
+  catch (err) {
+    console.log(`Set up 2x speed error`, err);
+  }
 
   while (1 === 1) {
     // if video ends, then watch another one
-    console.log(``);
     let adsXpath = `//img[@class='ytp-ad-image']`
     try {
       await driver.wait(until.elementLocated(By.xpath(adsXpath)), 100);
       await driver.wait(until.elementIsVisible(await driver.findElement(By.xpath(adsXpath))), 100);
     }
     catch (err) {
-      console.log(`add is not shown`);
+      // console.log(`add is not shown`);
     }
     let adsImg = await driver.findElements(By.xpath(adsXpath));
 
@@ -159,13 +193,36 @@ async function rewatch() {
       await driver.wait(until.elementIsVisible(await driver.findElement(By.xpath(replayButtonsXpath))), 100);
     }
     catch (err) {
-      console.log(`replay button is not shown`);
+      // console.log(`replay button is not shown`);
     }
     let replayButtons = await driver.findElements(By.xpath(replayButtonsXpath));
-    console.log(`replayButtons`, replayButtons.length);
 
-    if (replayButtons.length === 1 || adsImg.length > 0) {
-      console.log(`inside rewatch if, calling rewatch funciton`);
+    // get actual title
+    let actualTitleXpath = `//div[@id='info']//h1`
+    try {
+      await driver.wait(until.elementLocated(By.xpath(actualTitleXpath)), 100);
+      let actualTitleEl = await driver.findElement(By.xpath(actualTitleXpath));
+      let actualTitle = await actualTitleEl.getText();
+      // remove extra spaces from the actual title
+      actualTitle = replaceSpaces(actualTitle);
+    }
+    catch (err) {
+      console.log(`getting actual title inside while loop error`, err);
+    }
+
+    while (actualTitle.includes('й')) {
+      actualTitle = actualTitle.replace(/й/, 'й');
+    }
+
+    console.log(`t `, videoTitle);
+    console.log(`a `, actualTitle);
+
+    console.log(`(replayButtons.length === 1) `, (replayButtons.length == 1));
+    console.log(`(adsImg.length > 0) `, (adsImg.length > 0));
+    console.log(`!(videoTitle === actualTitle) `, !(videoTitle === actualTitle));
+
+    if ((replayButtons.length === 1) || (adsImg.length > 0) || !(videoTitle === actualTitle)) {
+      console.log(`inside rewatch if, calling rewatch function`);
       await rewatch();
     }
   }
