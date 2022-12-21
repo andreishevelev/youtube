@@ -71,7 +71,7 @@ async function rewatch() {
   console.log(`click video title`);
   let videoTileArr = videoTitle.split(' ')
   let firstWord = videoTileArr[0];
-  let resultTile = await driver.wait(until.elementLocated(By.xpath(`//div[@id='title-wrapper']//*[contains(text(), '${firstWord}')]`)), defTimeout);
+  let resultTile = await driver.wait(until.elementLocated(By.xpath(`//div[@id='title-wrapper']//*[contains(text(), '${firstWord}')] | //a[contains(text(), '${firstWord}')]`)), defTimeout);
   await actions.move({ origin: resultTile }).perform();
   await driver.sleep(1000);
   await resultTile.click();
