@@ -9,8 +9,8 @@ const driver = new Builder().forBrowser('chrome').setChromeOptions(options).buil
 
 let defTimeout = 5000;
 
-let emailStr = `sheveleva.oksana.34@gmail.com`
-let basePasswordStr = `20LDFLWFNM`
+let emailStr = `karlovas241@gmail.com`
+let basePasswordStr = `Perfection1`
 let youtubeUrl = `https://www.youtube.com`
 
 let waitLV = async (locator, timeout) => {

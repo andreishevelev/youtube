@@ -1,16 +1,11 @@
 import { expect } from "chai";
 import { until, Builder, By, Key, Origin } from "selenium-webdriver";
-import Mongodb from "../Mongodb.js"
+import * as mongodb from '../Mongodb.js';
 import { Options } from "selenium-webdriver/chrome.js";
-
-
-let mongodb = new Mongodb();
 
 var options = new Options();
 options.options_["debuggerAddress"] = "127.0.0.1:9222";
 const driver = new Builder().forBrowser('chrome').setChromeOptions(options).build();
-
-// await driver.manage().window().maximize();
 
 let defTimeout = 5000;
 
@@ -29,107 +24,156 @@ function getRandomIntInclusive(min, max) {
   return Math.floor(Math.random() * (max - min + 1) + min); // The maximum is inclusive and the minimum is inclusive
 }
 
-describe(`Can watch video again and again and ...`, function () {
-  this.timeout(0);
-  this.retries(100);
+const channelName = `veselovka channel`
+let watchedTitles = [];
+let videoTitles = await mongodb.findOneST("google", "videos");
+await driver.sleep(3000);
+videoTitles = videoTitles.document.videos;
 
-  before(async () => {
-  });
+// fetch users from mongo
 
-  after(async () => {
-  });
+// inf loop
 
-  it(`can re-watch the video`, async () => {
-    let inf = 1;
+// for each user
 
-    let clickedTiles = [];
+// open youtube.com
 
-    async function rewatch() {
+// log in
 
-      await driver.get(youtubeUrl);
-      let actions = driver.actions({ async: true });
+async function rewatch() {
 
-      let searchInput = await waitLV(By.xpath(`//input[@id="search"]`), defTimeout);
-      await actions.move({ origin: searchInput }).perform();
-      await driver.sleep(1000);
-      await searchInput.sendKeys('veselovka channel');
+  let titleNum = getRandomIntInclusive(0, videoTitles.length - 1);
+  let videoTitle = videoTitles[titleNum];
 
-      let searchButton = await waitLV(By.xpath(`//button[@id="search-icon-legacy"]`), defTimeout);
-      await actions.move({ origin: searchButton }).perform();
-      await driver.sleep(1000);
-      await searchButton.click();
+  if (watchedTitles.length === videoTitles.length) { watchedTitles = [] } // TODO Log out, break
+  if (watchedTitles.includes(videoTitle)) { await rewatch() }
 
-      let channel = await driver.wait(until.elementLocated(By.xpath(`//*[.='veselovka']/preceding::ytd-channel-name[@id='channel-title'][1]`)), defTimeout);
-      await actions.move({ origin: channel }).perform();
-      await driver.sleep(1000);
-      await channel.click();
+  // open youtube.com
+  console.log(`open youtube.com`);
+  await driver.get(youtubeUrl);
+  let actions = driver.actions({ async: true });
 
-      await driver.sleep(3000);
+  // enter video name to the search input
+  console.log(`enter video name to the search input`);
+  let searchInput = await waitLV(By.xpath(`//input[@id="search"]`), defTimeout);
+  await actions.move({ origin: searchInput }).perform();
+  await driver.sleep(2000);
+  await searchInput.sendKeys(`veselovka channel ${videoTitle}`);
 
-      actions = driver.actions({ async: true });
-      await actions
-        .keyDown(Key.TAB)
-        .keyDown(Key.TAB)
-        .keyDown(Key.TAB)
-        .keyDown(Key.RIGHT)
-        .keyDown(Key.ENTER)
-        .perform();
+  // click search button
+  console.log(`click search button`);
+  let searchButton = await waitLV(By.xpath(`//button[@id="search-icon-legacy"]`), defTimeout);
+  await actions.move({ origin: searchButton }).perform();
+  await driver.sleep(2000);
+  await searchButton.click();
 
-      let tilesXpath = `//ytd-two-column-browse-results-renderer[@page-subtype="channels"]//div[@id="content"]`
-      await driver.wait(until.elementLocated(By.xpath(tilesXpath)), defTimeout);
-      await driver.wait(until.elementIsVisible(await driver.findElement(By.xpath(tilesXpath))), defTimeout);
-      let tiles = await driver.findElements(By.xpath(tilesXpath));
+  // click video title
+  console.log(`click video title`);
+  let videoTileArr = videoTitle.split(' ')
+  let firstWord = videoTileArr[0];
+  let resultTile = await driver.wait(until.elementLocated(By.xpath(`//div[@id='title-wrapper']//*[contains(text(), '${firstWord}')]`)), defTimeout);
+  await actions.move({ origin: resultTile }).perform();
+  await driver.sleep(1000);
+  await resultTile.click();
+  await driver.sleep(1000);
 
-      let randomTileNum = getRandomIntInclusive(1, tiles.length);
-      let tile = tiles[randomTileNum];
-
-      while (clickedTiles.includes(randomTileNum)) {
-        clickedTiles.length === tiles.length ? clickedTiles = []:
-        randomTileNum = (getRandomIntInclusive(1, tiles.length));
-        tile = tiles[randomTileNum];
-      }
-
-      clickedTiles.push(randomTileNum);
-
-      console.log(`clickedTiles `, clickedTiles);
-      console.log(`randomTileNum `, randomTileNum);
-
-      await actions.move({ origin: tile }).perform();
-      await driver.sleep(1000);
-      await tile.click();
-
-      while (inf === 1) {
-
-        let timelineLocator = `//div[@class='ytp-timed-markers-container']`
-        let timelineEl = await waitLV(By.xpath(timelineLocator), defTimeout);
-        // let timelineEl = await driver.wait(until.elementLocated(By.xpath(timelineLocator)), defTimeout);
-        // await driver.sleep(1000);
-        const actions = driver.actions({ async: true });
-        await actions.move({ origin: timelineEl }).perform();
-        await actions.move({ x: 8, y: 0, origin: Origin.POINTER }).perform();
-        await actions.move({ x: -8, y: 0, origin: Origin.POINTER }).perform();
-
-        let durationLocator = `//span[@class='ytp-time-duration']`
-        let durationEl = await driver.wait(until.elementLocated(By.xpath(durationLocator)), defTimeout);
-        let duration = await durationEl.getText();
-
-        let currentLocator = `//span[@class='ytp-time-current']`
-        let currentEl = await driver.wait(until.elementLocated(By.xpath(currentLocator)), defTimeout);
-        let current = await currentEl.getText();
-
-        console.log(`current`, current);
-        console.log(`duration`, duration);
-
-        if (current === duration) {
-          console.log(`inside if`);
-          await rewatch();
-
-        }
-        await driver.sleep(500);
-      }
+  // if add shown click skip button
+  for (let i = 0; i < 2; i++) {
+    console.log(`inside for loop skip add`);
+    let adsXpath = `//img[@class='ytp-ad-image' or @class='ytp-ads-image']`
+    try {
+      await driver.wait(until.elementLocated(By.xpath(adsXpath)), 2000);
+      await driver.wait(until.elementIsVisible(await driver.findElement(By.xpath(adsXpath))), 1000);
+    }
+    catch (err) {
+      console.log(`add is not show`);
     }
 
-    await rewatch();
+    let adsImg = await driver.findElements(By.xpath(adsXpath));
+    console.log(`adsImg.length `, adsImg.length);
+    if (adsImg.length > 0) {
+      let skipAdsXpath = `//button[.='Skip Ads' or .='Skip Ad']`
+      try {
+        await driver.wait(until.elementLocated(By.xpath(skipAdsXpath)), 6000);
+        await driver.wait(until.elementIsVisible(await driver.findElement(By.xpath(skipAdsXpath))), 1000);
+      }
+      catch (err) {
+        console.log(`skip add/s is not show`);
+      }
+      let skipAds = await driver.findElements(By.xpath(skipAdsXpath));
+      console.log(`skipAds`, skipAds.length);
+      if (skipAds.length === 1) {
+        console.log(`inside skipAds if`);
+        await driver.wait(until.elementIsVisible(skipAds[0]), defTimeout);
+        await skipAds[0].click();
+      }
+    }
+  }
 
-  });
-});
+  // add current video to the array with watched videos
+  if (!watchedTitles.includes(videoTitle)) { watchedTitles.push(videoTitle) }
+  console.log(`watchedTitles`, watchedTitles);
+
+  // try to set playback speed to x2 speed
+  try {
+    // mouse over the video
+    console.log(`mouse over the video`);
+    let video = await waitLV(By.xpath(`//video`), defTimeout);
+    actions = driver.actions({ async: true });
+    await actions.move({ origin: video }).perform();
+
+    // set playback speed to 2x
+    // click settings button
+    console.log(`set playback speed to 2x`);
+    console.log(`click settings button`);
+    let settingsButton = await waitLV(By.xpath(`//button[@title='Settings']`), 2000);
+    await settingsButton.click();
+    await driver.sleep(700);
+
+    // select playback speed option
+    console.log(`select playback speed option`);
+    let plSpeedButton = await waitLV(By.xpath(`//div[.='Playback speed']`), 2000);
+    await plSpeedButton.click();
+    await driver.sleep(800);
+
+    // select 2x speed
+    console.log(`select 2x speed`);
+    let speed2x = await waitLV(By.xpath(`//div[@class='ytp-menuitem-label' and .='2']`), 2000);
+    await speed2x.click();
+    await settingsButton.click();
+    await driver.sleep(1200);
+  }
+  catch (err) {
+    console.log(`Set up 2x speed error`, err);
+  }
+
+  while (1 === 1) {
+    // if video ends, then watch another one
+    let adsXpath = `//img[@class='ytp-ad-image' or @class='ytp-ads-image']`
+    try {
+      await driver.wait(until.elementLocated(By.xpath(adsXpath)), 100);
+      await driver.wait(until.elementIsVisible(await driver.findElement(By.xpath(adsXpath))), 100);
+    }
+    catch (err) {
+      // console.log(`add is not shown`);
+    }
+    let adsImg = await driver.findElements(By.xpath(adsXpath));
+
+    let replayButtonsXpath = `//button[@title='Replay']`
+    try {
+      await driver.wait(until.elementLocated(By.xpath(replayButtonsXpath)), 100);
+      await driver.wait(until.elementIsVisible(await driver.findElement(By.xpath(replayButtonsXpath))), 100);
+    }
+    catch (err) {
+      // console.log(`replay button is not shown`);
+    }
+    let replayButtons = await driver.findElements(By.xpath(replayButtonsXpath));
+
+    if ((replayButtons.length > 0) || (adsImg.length > 0)) {
+      console.log(`inside rewatch if, calling rewatch function`);
+      await rewatch();
+    }
+  }
+}
+
+await rewatch();
