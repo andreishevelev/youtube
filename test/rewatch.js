@@ -8,9 +8,6 @@ options.options_["debuggerAddress"] = "127.0.0.1:9222";
 const driver = new Builder().forBrowser('chrome').setChromeOptions(options).build();
 
 let defTimeout = 5000;
-
-let emailStr = `sheveleva.oksana.34@gmail.com`
-let basePasswordStr = `20LDFLWFNM`
 let youtubeUrl = `https://www.youtube.com`
 
 let waitLV = async (locator, timeout) => {
@@ -27,18 +24,7 @@ function getRandomIntInclusive(min, max) {
 const channelName = `veselovka channel`
 let watchedTitles = [];
 let videoTitles = await mongodb.findOneST("google", "videos");
-await driver.sleep(3000);
 videoTitles = videoTitles.document.videos;
-
-// fetch users from mongo
-
-// inf loop
-
-// for each user
-
-// open youtube.com
-
-// log in
 
 async function rewatch() {
 
@@ -51,31 +37,32 @@ async function rewatch() {
   // open youtube.com
   console.log(`open youtube.com`);
   await driver.get(youtubeUrl);
-  let actions = driver.actions({ async: true });
 
   // enter video name to the search input
   console.log(`enter video name to the search input`);
   let searchInput = await waitLV(By.xpath(`//input[@id="search"]`), defTimeout);
-  await actions.move({ origin: searchInput }).perform();
-  await driver.sleep(2000);
   await searchInput.sendKeys(`veselovka channel ${videoTitle}`);
 
   // click search button
   console.log(`click search button`);
   let searchButton = await waitLV(By.xpath(`//button[@id="search-icon-legacy"]`), defTimeout);
-  await actions.move({ origin: searchButton }).perform();
-  await driver.sleep(2000);
   await searchButton.click();
 
   // click video title
-  console.log(`click video title`);
-  let videoTileArr = videoTitle.split(' ')
-  let firstWord = videoTileArr[0];
-  let resultTile = await driver.wait(until.elementLocated(By.xpath(`//div[@id='title-wrapper']//*[contains(text(), '${firstWord}')]`)), defTimeout);
-  await actions.move({ origin: resultTile }).perform();
-  await driver.sleep(1000);
-  await resultTile.click();
-  await driver.sleep(1000);
+  try {
+    console.log(`click video title`);
+    let videoTileArr = videoTitle.split(' ')
+    let firstWord = videoTileArr[0];
+    let resultTile = await waitLV(By.xpath(`//div[@id='title-wrapper']//*[contains(text(), '${firstWord}')]//preceding::a[1] | //a[contains(text(), '${firstWord}')]`), defTimeout);
+    await resultTile.click();
+
+  }
+  catch (err) {
+    if (err.name == 'ElementNotInteractableError') {
+      await driver.sleep(5000);
+      await resultTile.click();
+    }
+  }
 
   // if add shown click skip button
   for (let i = 0; i < 2; i++) {
@@ -113,39 +100,6 @@ async function rewatch() {
   // add current video to the array with watched videos
   if (!watchedTitles.includes(videoTitle)) { watchedTitles.push(videoTitle) }
   console.log(`watchedTitles`, watchedTitles);
-
-  // try to set playback speed to x2 speed
-  try {
-    // mouse over the video
-    console.log(`mouse over the video`);
-    let video = await waitLV(By.xpath(`//video`), defTimeout);
-    actions = driver.actions({ async: true });
-    await actions.move({ origin: video }).perform();
-
-    // set playback speed to 2x
-    // click settings button
-    console.log(`set playback speed to 2x`);
-    console.log(`click settings button`);
-    let settingsButton = await waitLV(By.xpath(`//button[@title='Settings']`), 2000);
-    await settingsButton.click();
-    await driver.sleep(700);
-
-    // select playback speed option
-    console.log(`select playback speed option`);
-    let plSpeedButton = await waitLV(By.xpath(`//div[.='Playback speed']`), 2000);
-    await plSpeedButton.click();
-    await driver.sleep(800);
-
-    // select 2x speed
-    console.log(`select 2x speed`);
-    let speed2x = await waitLV(By.xpath(`//div[@class='ytp-menuitem-label' and .='2']`), 2000);
-    await speed2x.click();
-    await settingsButton.click();
-    await driver.sleep(1200);
-  }
-  catch (err) {
-    console.log(`Set up 2x speed error`, err);
-  }
 
   while (1 === 1) {
     // if video ends, then watch another one
