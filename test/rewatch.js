@@ -48,19 +48,26 @@ async function rewatch() {
   let searchButton = await waitLV(By.xpath(`//button[@id="search-icon-legacy"]`), defTimeout);
   await searchButton.click();
 
-  // click video title
-  try {
+  async function clickVideoTitle(){
     console.log(`click video title`);
     let videoTileArr = videoTitle.split(' ')
     let firstWord = videoTileArr[0];
     let resultTile = await waitLV(By.xpath(`//div[@id='title-wrapper']//*[contains(text(), '${firstWord}')]//preceding::a[1] | //a[contains(text(), '${firstWord}')]`), defTimeout);
     await resultTile.click();
+  }
+  // click video title
+  try {
+    clickVideoTitle()
 
   }
   catch (err) {
     if (err.name == 'ElementNotInteractableError') {
+      console.log(`ElementNotInteractableError error`, err);
+      console.log(`click video tile second attemt after 5000 wait`, err);
       await driver.sleep(5000);
-      await resultTile.click();
+      clickVideoTitle()
+    } else {
+      console.log(`click video tile else error`, err);
     }
   }
 
