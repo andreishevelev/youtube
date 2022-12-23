@@ -7,7 +7,7 @@ var options = new Options();
 options.options_["debuggerAddress"] = "127.0.0.1:9222";
 const driver = new Builder().forBrowser('chrome').setChromeOptions(options).build();
 
-let defTimeout = 5000;
+let defTimeout = 10000;
 let youtubeUrl = `https://www.youtube.com`
 
 let waitLV = async (locator, timeout) => {
